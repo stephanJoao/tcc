@@ -14,7 +14,7 @@ if __name__ == '__main__':
 	# load confort dataset
 	df = read_mat("data/Sub_score.mat")
 	print(df.shape)
-	target_window = 8
+	target_window = 16
 
 	data = df[0, :, 0, :]
 	data_mean = data.mean(axis=1)
@@ -33,7 +33,7 @@ if __name__ == '__main__':
 	# plt.plot(data_mean)
 	# plt.show()
 	
-	subjects = [i for i in range(1, 31)]
+	subjects = [i for i in range(1, 11)]
 	depth = "high"
 	time_windows = [f"[0, {i*500}]" for i in range(1, 5)]
 	# shades of pastel blue from light to dark
