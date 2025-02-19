@@ -1,3 +1,5 @@
+import enum
+from turtle import color
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -102,13 +104,20 @@ if __name__ == "__main__":
     # plt.show()
 
     fig, ax1 = plt.subplots(figsize=(11, 5))
-    for depth in ["low", "high"]:
+    all_values = []
+    for depth in ["low"]:
         comfort_data = read_mat("data/Sub_score.mat")
         comfort_data = comfort_data[0, :, hilo[depth], :]
         comfort_data = comfort_data.mean(axis=1)
-        for target_window in [2, 4, 8, 16]:
+        for target_window in [16]:
+            targets = [
+                (i, i + target_window - 1)
+                for i in range(1, 60 + 1 - target_window + 1)
+            ]
             comfort_data_mean = np.convolve(
-                comfort_data, np.ones((target_window,)) / target_window, mode="valid"
+                comfort_data,
+                np.ones((target_window,)) / target_window,
+                mode="valid",
             )
             for time_window in time_windows:
                 accuracies = []
@@ -120,19 +129,74 @@ if __name__ == "__main__":
                     dataset = dataset[dataset["time_window"] == time_window]
                     accuracies.append(dataset["accuracy"])
                 accuracies = np.array(accuracies)
-                values = accuracies.mean(axis=0)
-                values = np.array(
-                    [
-                        itr(
-                            acc,
-                            target_window,
-                            float(time_window.strip("[]").split(",")[1]) / 1000,
-                        )
-                        for acc in values
-                    ]
-                )
-                plt.scatter(comfort_data_mean, values)
 
+                # print(accuracies.shape)
+                # exit()
+
+                values = accuracies.mean(axis=0)
+                # values = np.array(
+                #     [
+                #         itr(
+                #             acc,
+                #             target_window,
+                #             float(time_window.strip("[]").split(",")[1])
+                #             / 1000,
+                #         )
+                #         for acc in values
+                #     ]
+                # )
+                for idx, value in enumerate(values):
+                    all_values.append(
+                        ((depth, target_window, targets[idx], time_window), (comfort_data_mean[idx], value))
+                    )
+
+                # print values only if some value is greater than 140
+                # if np.max(values) > 140:
+                #     print(
+                #         f"Depth: {depth}, Target: {target_window}, Time:"
+                #         f" {time_window}"
+                #     )
+                    # print(values)
+                # plt.scatter(comfort_data_mean, values)
+
+    # all_values = np.array(all_values)
+    # print(all_values)
+
+    # in really light grey
+    plt.scatter(
+        [x[1][0] for x in all_values],
+        [x[1][1] for x in all_values],
+        color="#D3D3D3",
+    )
+
+    non_dom = []
+    # print all non-dominated points
+    for i in range(len(all_values)):
+        dominated = False
+        for j in range(len(all_values)):
+            if i == j:
+                continue
+            if all_values[i][1][0] <= all_values[j][1][0] and all_values[i][1][1] <= all_values[j][1][1]:
+                dominated = True
+                break
+        if not dominated:
+            non_dom.append(all_values[i])
+
+    # in black 
+    plt.scatter(
+        [x[1][0] for x in non_dom],
+        [x[1][1] for x in non_dom],
+        color="black",
+    )
+
+    # order non-dominated points by comfort and print
+    non_dom = sorted(non_dom, key=lambda x: x[1][0])
+    for i in range(len(non_dom)):
+        print(f"Depth: {non_dom[i][0][0]}, Target: {non_dom[i][0][1]}, Time: {non_dom[i][0][3]}")
+        print(f"Comfort: {non_dom[i][1][0]}, ITR: {non_dom[i][1][1]}")
+        print()
+
+    # plt.legend()
     plt.xlabel("Conforto")
     plt.ylabel("ITR")
     plt.show()
