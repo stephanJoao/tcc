@@ -105,11 +105,11 @@ if __name__ == "__main__":
 
     fig, ax1 = plt.subplots(figsize=(11, 5))
     all_values = []
-    for depth in ["low"]:
+    for depth in ["low", "high"]:
         comfort_data = read_mat("data/Sub_score.mat")
         comfort_data = comfort_data[0, :, hilo[depth], :]
         comfort_data = comfort_data.mean(axis=1)
-        for target_window in [16]:
+        for target_window in [2, 4, 8, 16]:
             targets = [
                 (i, i + target_window - 1)
                 for i in range(1, 60 + 1 - target_window + 1)
@@ -124,10 +124,10 @@ if __name__ == "__main__":
                 for subject in subjects:
                     # load dataset
                     dataset = pd.read_csv(
-                        f"results/subject_{subject}_depth_{depth}_targets_{target_window}.csv"
+                        f"results/subject_{subject}_depth_{depth}_targets_{target_window}_ITR.csv"
                     )
                     dataset = dataset[dataset["time_window"] == time_window]
-                    accuracies.append(dataset["accuracy"])
+                    accuracies.append(dataset["itr"])
                 accuracies = np.array(accuracies)
 
                 # print(accuracies.shape)

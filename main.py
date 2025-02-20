@@ -2,6 +2,7 @@ import sys
 import numpy as np
 import sklearn.cross_decomposition as skcd
 import pandas as pd
+import time
 
 sys.path.append("bciflow/")
 
@@ -54,10 +55,13 @@ def cca(X, sfreq, total_time=5000, targets=(2, 5), num_harmonics=3):
     )
 
     output = []
+    times = []
 
     for trial in range(X.shape[0]):
         for band in range(X.shape[1]):
             X_ = X[trial, band, :, :]
+            # measure time
+            start = time.time()
             corr_coefs = np.array([])
             for y_ in y:
                 cca_ = skcd.CCA(n_components=1)
@@ -65,9 +69,11 @@ def cca(X, sfreq, total_time=5000, targets=(2, 5), num_harmonics=3):
                 X_c, y_c = cca_.transform(X_.T, y_.T)
                 corr = np.corrcoef(X_c.T, y_c.T)[0, 1]
                 corr_coefs = np.append(corr_coefs, corr)
+            end = time.time()
+            times.append(end - start)
             output.append(targets[np.argmax(corr_coefs)])
 
-    return output
+    return output, np.mean(times)
 
 
 subjects = [i for i in range(1, 31)]
@@ -95,7 +101,7 @@ def run(subject, depth):
             print("      Running for time window: ", time_window)
             dataset__ = filter_dataset(dataset_, target, time_window)
             print("        Dataset shape: ", dataset__["X"].shape)
-            output = cca(
+            output, time = cca(
                 X=dataset__["X"],
                 sfreq=1000,
                 total_time=time_window[1] - time_window[0],
@@ -105,7 +111,7 @@ def run(subject, depth):
             output = np.array(output)
             accuracy = (output == dataset__["y"]).sum() / len(dataset__["y"])
             print("        Accuracy: ", accuracy)
-            table.append([subject, depth, target, time_window, accuracy])
+            table.append([subject, depth, target, time_window, accuracy, time])
 
     return table
 
@@ -118,8 +124,8 @@ for subject in subjects:
         table = run(int(subject), depth)
         df = pd.DataFrame(
             table,
-            columns=["subject", "depth", "target", "time_window", "accuracy"],
+            columns=["subject", "depth", "target", "time_window", "accuracy", "time"],
         )
         df.to_csv(
-            f"subject_{subject}_depth_{depth}_targets_{targets_window}.csv"
+            f"subject_{subject}_depth_{depth}_targets_{targets_window}_new.csv"
         )
