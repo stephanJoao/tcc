@@ -78,7 +78,7 @@ def cca(X, sfreq, total_time=5000, targets=(2, 5), num_harmonics=3):
 
 subjects = [i for i in range(1, 31)]
 print("Subjects: ", subjects)
-targets_window = 16
+targets_window = 2
 targets = [
     (i, i + targets_window - 1) for i in range(1, 60 + 1 - targets_window + 1)
 ]
