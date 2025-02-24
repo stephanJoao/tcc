@@ -76,7 +76,7 @@ def cca(X, sfreq, total_time=5000, targets=(2, 5), num_harmonics=3):
     return output, np.mean(times)
 
 
-subjects = [i for i in range(1, 31)]
+subjects = [i for i in range(26, 31)]
 print("Subjects: ", subjects)
 targets_window = 2
 targets = [
