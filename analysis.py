@@ -17,13 +17,13 @@ if __name__ == "__main__":
     metric = "itr"
     time_windows = [f"[0, {i*500}]" for i in range(1, 5)]
     shades_of_blue = ["#B3C7D6", "#8AA9C1", "#5E8CB3", "#2E6E9E"]
-    # shades_of_green = ["#B3D6C7", "#8AC1A9", "#5EB3A0", "#2E9E6E"]
-    shades_of_green = ["#B3C7D6", "#8AA9C1", "#5E8CB3", "#2E6E9E"]
 
     hilo = {
         "low": 0,
         "high": 1,
     }
+
+    # CONFORTO E METRICA
 
     # fig, ax1 = plt.subplots(figsize=(11, 5))
     # for depth in ["high"]:
@@ -82,28 +82,7 @@ if __name__ == "__main__":
     #     comfort_data_mean = np.convolve(
     #         comfort_data, np.ones((target_window,)) / target_window, mode="valid"
     #     )
-
-    # fig, ax1 = plt.subplots(figsize=(11, 5))
-    # for time_window in time_windows:
-    #     accuracies = []
-    #     for subject in subjects:
-    #         # load dataset
-    #         dataset = pd.read_csv(
-    #             f"results/subject_{subject}_depth_{depth}_targets_{target_window}.csv"
-    #         )
-    #         dataset = dataset[dataset["time_window"] == time_window]
-    #         accuracies.append(dataset["accuracy"])
-    #     accuracies = np.array(accuracies)
-    #     accuracies_mean = accuracies.mean(axis=0)
-    #     plt.scatter(
-    #         comfort_data_mean,
-    #         accuracies_mean
-    #     )
-
-    # plt.xlabel("Conforto")
-    # plt.ylabel("Acurácia")
-    # plt.show()
-
+   
 
     # PARETO TUDO
 
@@ -144,7 +123,6 @@ if __name__ == "__main__":
                         )
                     )
 
-    # in really light grey plot with circles and triangles smae logic
     for i in range(len(all_values)):
         plt.scatter(
             all_values[i][1][0],
@@ -153,9 +131,8 @@ if __name__ == "__main__":
             marker="o" if all_values[i][0][0] == "low" else "^",
             zorder=1,
         )
-
-    non_dom = []
-    # print all non-dominated points
+    
+    non_dom = []    
     for i in range(len(all_values)):
         dominated = False
         for j in range(len(all_values)):
@@ -226,7 +203,6 @@ if __name__ == "__main__":
     plt.axhline(y=1 / target_window, color="black", linestyle="--", alpha=0.5, label="Aleatório")
 
     plt.legend()
-    # plt grid background
     plt.grid(color="grey", linestyle="--", linewidth=0.5, zorder=2)
     plt.xlabel("Conforto")
     plt.ylabel("Acurácia")
