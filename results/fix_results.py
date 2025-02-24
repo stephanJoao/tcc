@@ -28,25 +28,17 @@ for target_window in target_windows:
     for depth in depths:
         for subject in subjects:
             dataset = pd.read_csv(
-                f"results/subject_{subject}_depth_{depth}_targets_{target_window}.csv"
+                f"results/subject_{subject}_depth_{depth}_targets_{target_window}_new.csv"
             )
-            if target_window == 2:
-                add = 0.03
-            elif target_window == 4:
-                add = 0.05
-            elif target_window == 8:
-                add = 0.1
-            else:
-                add = 0.2
             dataset["itr"] = dataset.apply(
                 lambda row: itr(
                     row["accuracy"],
                     target_window,
-                    float(row["time_window"].strip("[]").split(",")[1]) / 1000 + add,
+                    float(row["time_window"].strip("[]").split(",")[1]) / 1000 + row["time"],
                 ),
                 axis=1,
             )
             dataset.to_csv(
-				f"results/subject_{subject}_depth_{depth}_targets_{target_window}_ITR.csv",
+				f"results/subject_{subject}_depth_{depth}_targets_{target_window}_itr.csv",
 				index=False,
 			)
