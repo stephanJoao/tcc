@@ -1,7 +1,16 @@
+from dis import disco
+import dis
 import h5py
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+
+
+def proportional_comfort(comfort, total_time):
+    discomfort = 5 - comfort
+    discomfort = discomfort * total_time / 5000
+    comfort = 5 - discomfort
+    return comfort
 
 
 def read_mat(filename):
@@ -12,7 +21,7 @@ def read_mat(filename):
 
 if __name__ == "__main__":
     subjects = [i for i in range(1, 31)]
-    target_window = 2
+    target_window = 16
     depth = "high"
     metric = "itr"
     time_windows = [f"[0, {i*500}]" for i in range(1, 5)]
@@ -26,62 +35,59 @@ if __name__ == "__main__":
     # CONFORTO E METRICA
 
     # fig, ax1 = plt.subplots(figsize=(11, 5))
-    # for depth in ["high"]:
-    #     comfort_data = read_mat("data/Sub_score.mat")
-    #     comfort_data = comfort_data[0, :, hilo[depth], :]
-    #     comfort_data = comfort_data.mean(axis=1)
-    #     comfort_data_mean = np.convolve(
-    #         comfort_data, np.ones((target_window,)) / target_window, mode="valid"
-    #     )
-    #     for time_window in time_windows:
-    #         values = []
-    #         for subject in subjects:
-    #             # load dataset
-    #             dataset = pd.read_csv(
-    #                 f"results/subject_{subject}_depth_{depth}_targets_{target_window}_ITR.csv"
-    #             )
-    #             dataset = dataset[dataset["time_window"] == time_window]
-    #             values.append(dataset[metric])
-    #         values = np.array(values)
-    #         values_mean = values.mean(axis=0)
-    #         color_idx = time_windows.index(time_window)
-    #         if depth == "low":
-    #             ax1.plot(
-    #                 dataset["target"],
-    #                 values_mean,
-    #                 color=shades_of_green[color_idx],
-    #                 label=f"Tempo: {time_window.strip('[]').split(',')[1]}ms",
-    #             )
-    #         else:
-    #             ax1.plot(
-    #                 dataset["target"],
-    #                 values_mean,
-    #                 color=shades_of_blue[color_idx],
-    #                 label=f"Tempo: {time_window.strip("[]").split(",")[1]}ms",
-    #             )
-    #         ax1.tick_params(axis="x", labelrotation=90)
+    # comfort_data = read_mat("data/Sub_score.mat")
+    # comfort_data = comfort_data[0, :, hilo[depth], :]
+    # comfort_data = comfort_data.mean(axis=1)
+    # comfort_data_mean = np.convolve(
+    #     comfort_data, np.ones((target_window,)) / target_window, mode="valid"
+    # )
+    # for time_window in time_windows:
+    #     values = []
+    #     for subject in subjects:
+    #         # load dataset
+    #         dataset = pd.read_csv(
+    #             f"results/subject_{subject}_depth_{depth}_targets_{target_window}.csv"
+    #         )
+    #         dataset = dataset[dataset["time_window"] == time_window]
+    #         values.append(dataset[metric])
+    #     values = np.array(values)
+    #     values_mean = values.mean(axis=0)
+    #     color_idx = time_windows.index(time_window)
+    #     if depth == "low":
+    #         ax1.plot(
+    #             dataset["target"],
+    #             values_mean,
+    #             color=shades_of_blue[color_idx],
+    #             label=f"Tempo: {time_window.strip('[]').split(',')[1]}ms",
+    #         )
+    #     else:
+    #         ax1.plot(
+    #             dataset["target"],
+    #             values_mean,
+    #             color=shades_of_blue[color_idx],
+    #             label=f"Tempo: {time_window.strip("[]").split(",")[1]}ms",
+    #         )
+    #     ax1.tick_params(axis="x", labelrotation=90)
+    #     if metric == "accuracy":
     #         ax1.set_ylim(0, 1)
 
-    #     ax2 = ax1.twinx()
-    #     ax2.plot(comfort_data_mean, color="red", label="Conforto")
-    #     ax2.set_ylim(0, 5)
-    # ax1.axhline(y=1 / target_window, color="black", linestyle="--", alpha=0.5, label="Aleatório")
+    # ax2 = ax1.twinx()
+    # ax2.plot(comfort_data_mean, color="red", label="Conforto")
+    # ax2.set_ylim(0, 5)
+    # if metric == "accuracy":
+    #     ax1.axhline(y=1 / target_window, color="black", linestyle="--", alpha=0.5, label="Aleatório")
     # ax1.set_xlim(0, 60 - target_window)
     # ax1.set_xlabel("Janelas de frequência")
-    # ax1.set_ylabel("ITR")
+    # if metric == "itr":
+    #     ax1.set_ylabel("ITR")
+    # else:
+    #     ax1.set_ylabel("Acurácia")
     # ax2.set_ylabel("Conforto")
     # fig.legend(loc="lower right", bbox_to_anchor=(0.95, 0.2))
 
     # plt.tight_layout()
-    # # plt.savefig(f"plots/accuracy_{depth}_targets_{target_window}.pdf", format="pdf", bbox_inches="tight", dpi=300)
+    # # plt.savefig(f"plots/{metric}_{depth}_targets_{target_window}.pdf", format="pdf", bbox_inches="tight", dpi=300)
     # plt.show()
-
-    # comfort_data = read_mat("data/Sub_score.mat")
-    #     comfort_data = comfort_data[0, :, hilo[depth], :]
-    #     comfort_data = comfort_data.mean(axis=1)
-    #     comfort_data_mean = np.convolve(
-    #         comfort_data, np.ones((target_window,)) / target_window, mode="valid"
-    #     )
    
 
     # PARETO TUDO
@@ -105,9 +111,8 @@ if __name__ == "__main__":
             for time_window in time_windows:
                 values = []
                 for subject in subjects:
-                    # load dataset
                     dataset = pd.read_csv(
-                        f"results/subject_{subject}_depth_{depth}_targets_{target_window}_itr.csv"
+                        f"results/subject_{subject}_depth_{depth}_targets_{target_window}.csv"
                     )
                     dataset = dataset[dataset["time_window"] == time_window]
                     values.append(dataset[metric])
@@ -115,11 +120,13 @@ if __name__ == "__main__":
 
                 values = values.mean(axis=0)
 
+                print(time_window.strip("[]").split(",")[1])
                 for idx, value in enumerate(values):
                     all_values.append(
                         (
                             (depth, target_window, targets[idx], time_window),
-                            (comfort_data_mean[idx], value),
+                            (proportional_comfort(comfort_data_mean[idx], float(time_window.strip("[]").split(",")[1])), value),
+                            # (comfort_data_mean[idx], value),
                         )
                     )
 
@@ -206,5 +213,5 @@ if __name__ == "__main__":
     plt.grid(color="grey", linestyle="--", linewidth=0.5, zorder=2)
     plt.xlabel("Conforto")
     plt.ylabel("Acurácia")
-    plt.savefig(f"plots/pareto_accuracy_targets_all.pdf", format="pdf", bbox_inches="tight", dpi=300)
+    plt.savefig(f"plots/pareto_{metric}_targets_all.pdf", format="pdf", bbox_inches="tight", dpi=300)
     plt.show()
