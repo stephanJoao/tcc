@@ -76,9 +76,42 @@ def cca(X, sfreq, total_time=5000, targets=(2, 5), num_harmonics=3):
     return output, np.mean(times)
 
 
-subjects = [i for i in range(26, 31)]
+def pls(X, sfreq, total_time=5000, targets=(2, 5), num_harmonics=3):
+    if type(targets) == tuple:
+        targets = np.arange(targets[0], targets[1] + 1)
+    
+    y = np.array(
+        [
+            build_target(target, sfreq, total_time, num_harmonics)
+            for target in targets
+        ]
+    )
+    
+    output = []
+    times = []
+    
+    for trial in range(X.shape[0]):
+        for band in range(X.shape[1]):
+            X_ = X[trial, band, :, :]
+            # Measure time
+            start = time.time()
+            corr_coefs = np.array([])
+            for y_ in y:
+                pls_ = skcd.PLSCanonical(n_components=1)
+                pls_.fit(X_.T, y_.T)
+                X_c, y_c = pls_.transform(X_.T, y_.T)
+                corr = np.corrcoef(X_c.T, y_c.T)[0, 1]
+                corr_coefs = np.append(corr_coefs, corr)
+            end = time.time()
+            times.append(end - start)
+            output.append(targets[np.argmax(corr_coefs)])
+    
+    return output, np.mean(times)
+
+
+subjects = [i for i in range(8, 31)]
 print("Subjects: ", subjects)
-targets_window = 2
+targets_window = 16
 targets = [
     (i, i + targets_window - 1) for i in range(1, 60 + 1 - targets_window + 1)
 ]
@@ -101,7 +134,7 @@ def run(subject, depth):
             print("      Running for time window: ", time_window)
             dataset__ = filter_dataset(dataset_, target, time_window)
             print("        Dataset shape: ", dataset__["X"].shape)
-            output, time = cca(
+            output, time = pls(
                 X=dataset__["X"],
                 sfreq=1000,
                 total_time=time_window[1] - time_window[0],
