@@ -102,7 +102,7 @@ def plot_metric(metric, depth, target_window):
         for subject in subjects:
             # load dataset
             dataset = pd.read_csv(
-                f"results/subject_{subject}_depth_{depth}_targets_{target_window}_new.csv"
+                f"results/subject_{subject}_depth_{depth}_targets_{target_window}_itr.csv"
             )
             dataset = dataset[dataset["time_window"] == time_window]
             values.append(dataset[metric])
@@ -202,8 +202,8 @@ if __name__ == "__main__":
 
     for depth in ["low", "high"]:
         for target_window in [2, 4, 8, 16]:
-            plot_time("itr", depth, target_window)
-            # plot_time("accuracy", depth, target_window)
+            # plot_time("itr", depth, target_window)
+            plot_time("accuracy", depth, target_window)
     exit()
 
 
