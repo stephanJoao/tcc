@@ -90,7 +90,7 @@ def plot_metric(metric, depth, target_window):
     shades_of_blue = ["#B3C7D6", "#8AA9C1", "#5E8CB3", "#2E6E9E"]
     time_windows = [f"[0, {i*500}]" for i in range(1, 5)]
 
-    fig, ax1 = plt.subplots(figsize=(11, 4.3))
+    fig, ax1 = plt.subplots(figsize=(11, 4.1))
     comfort_data = read_mat("data/Sub_score.mat")
     comfort_data = comfort_data[0, :, hilo[depth], :]
     comfort_data = comfort_data.mean(axis=1)
@@ -102,7 +102,7 @@ def plot_metric(metric, depth, target_window):
         for subject in subjects:
             # load dataset
             dataset = pd.read_csv(
-                f"results/subject_{subject}_depth_{depth}_targets_{target_window}.csv"
+                f"results/subject_{subject}_depth_{depth}_targets_{target_window}_new.csv"
             )
             dataset = dataset[dataset["time_window"] == time_window]
             values.append(dataset[metric])
@@ -168,7 +168,7 @@ def plot_metric(metric, depth, target_window):
 
     plt.tight_layout()
     plt.savefig(
-        f"plots/{metric}_{depth}_targets_{target_window}.pdf",
+        f"plots/{metric}_{depth}_targets_{target_window}_pls.pdf",
         format="pdf",
         bbox_inches="tight",
         dpi=300,
